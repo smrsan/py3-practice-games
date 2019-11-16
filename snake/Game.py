@@ -141,7 +141,6 @@ def on_press(game):
     def fn(key):
         try:
             key_char = key.char.lower()
-            print(f'You Pressed: {key_char}')
             if key_char == 'w':
                 game.snake.move_dir = 'up'
             elif key_char == 's':
