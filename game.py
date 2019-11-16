@@ -1,7 +1,13 @@
+# Installed dependencies
+import colorama
+
+# Misc
 from mastermind import mastermind_game
 from rocks_papers_scissors import rps_game
 from snake import snake_game
-from utils import clear_term
+from utils import clear_term, flush_input
+
+colorama.init()
 
 while True:
     clear_term()
@@ -13,6 +19,7 @@ while True:
 
 (sth else = quit)"""
     )
+    flush_input()
     selected_game = input('Enter a game number: ')
     if selected_game == '1':
         mastermind_game()
@@ -21,6 +28,7 @@ while True:
     elif selected_game == '3':
         snake_game()
     else:
+        print('Good Bye...')
         break
 
-print('Good Bye...')
+colorama.deinit()
