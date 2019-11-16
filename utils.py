@@ -1,4 +1,5 @@
 import os
+import sys
 
 
 def get_item_by_index(obj, key_index, default_val='quit'):
@@ -22,3 +23,14 @@ def clear_term():
     # print(chr(27) + "[2J")
     # print("\x1b[2J\x1b[H")
     os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def flush_input():
+    try:
+        import msvcrt
+        while msvcrt.kbhit():
+            msvcrt.getch()
+    except ImportError:
+        import sys
+        import termios
+        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
