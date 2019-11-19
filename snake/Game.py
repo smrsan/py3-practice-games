@@ -92,14 +92,10 @@ class Game:
             self.is_right_wall(x)
 
     def is_snake_head(self, x, y):
-        return x == self.snake.head_xy[0] and \
-            y == self.snake.head_xy[1]
+        return [x, y] == self.snake.head_xy
 
     def is_snake_body(self, x, y):
-        for part in self.snake.body_xy:
-            if x == part[0] and y == part[1]:
-                return True
-        return False
+        return [x, y] in self.snake.body_xy
 
     def is_food(self, x, y):
         return x == self.food.xy[0] and \
