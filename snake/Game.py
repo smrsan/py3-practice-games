@@ -52,8 +52,10 @@ class Game:
         for y in range(self.board_height):
             for x in range(self.board_width):
                 if self.is_wall(x, y):
-                    print('#', end='')
-                elif self.is_snake_head(x, y):
+                    self.draw_wall(x, y)
+                    continue
+
+                if self.is_snake_head(x, y):
                     print(self.snake.color + self.snake.head_char,
                           end=colorama.Style.RESET_ALL)
                 elif self.is_snake_body(x, y):
@@ -72,6 +74,26 @@ class Game:
             end=''
         )
         print(f"<Food XY: {{{self.food.xy[0]}, {self.food.xy[1]}}}> 🃟")
+
+    def draw_wall(self, x, y):
+        if self.is_top_wall(y):
+            if self.is_left_wall(x):
+                print(' ', end='╔')
+            elif self.is_right_wall(x):
+                print('╗', end=' ')
+            else:
+                print('═', end='═')
+        elif self.is_bottom_wall(y):
+            if self.is_left_wall(x):
+                print(' ', end='╚')
+            elif self.is_right_wall(x):
+                print('╝', end=' ')
+            else:
+                print('═', end='═')
+        elif self.is_left_wall(x):
+            print(' ', end='║')
+        elif self.is_right_wall(x):
+            print('║', end=' ')
 
     def is_top_wall(self, y):
         return not y
