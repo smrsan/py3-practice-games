@@ -98,8 +98,7 @@ class Game:
         return [x, y] in self.snake.body_xy
 
     def is_food(self, x, y):
-        return x == self.food.xy[0] and \
-            y == self.food.xy[1]
+        return [x, y] == self.food.xy
 
     def move_snake(self):
         last_head_xy = self.snake.head_xy[:]
