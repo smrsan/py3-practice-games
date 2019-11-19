@@ -33,6 +33,7 @@ class Game:
 
     def deinit(self):
         self.detach_keyboard_events()
+        flush_input()
 
     def attach_keyboard_events(self):
         self.key_listener = Listener(
@@ -43,7 +44,6 @@ class Game:
 
     def detach_keyboard_events(self):
         self.key_listener.stop()
-        flush_input()
 
     def run(self):
         while not self.should_exit:
