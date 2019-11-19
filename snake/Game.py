@@ -22,6 +22,7 @@ class Game:
             board_width=self.board_width,
             board_height=self.board_height
         )
+        self.food = Food(self.snake.head_xy)
         self.drop_food()
         self.attach_keyboard_events()
 
@@ -105,7 +106,7 @@ class Game:
             y == self.food.xy[1]
 
     def move_snake(self):
-        last_part_xy = self.snake.head_xy[:]
+        last_head_xy = self.snake.head_xy[:]
 
         if self.snake.move_dir == 'up':
             self.snake.head_xy[1] -= 1
@@ -125,22 +126,19 @@ class Game:
         elif self.is_right_wall(self.snake.head_xy[0]):
             self.snake.head_xy[0] = 1
 
-        self.snake.body_xy.append(last_part_xy)
-        last_part_xy = self.snake.body_xy[0]
+        self.snake.body_xy.append(last_head_xy)
 
         if self.is_food(self.snake.head_xy[0], self.snake.head_xy[1]):
             self.drop_food()
         else:
-            self.snake.body_xy.remove(last_part_xy)
+            self.snake.body_xy.remove(self.snake.body_xy[0])
 
     def drop_food(self):
-        food_xy = [None, None]
-        while True:
+        food_xy = self.food.xy
+        while self.is_snake_head(food_xy[0], food_xy[1]) or \
+                self.is_snake_body(food_xy[0], food_xy[1]):
             food_xy[0] = int(uniform(1, self.board_width - 2))
             food_xy[1] = int(uniform(1, self.board_height - 2))
-            if not self.is_snake_head(food_xy[0], food_xy[1]) and \
-                    not self.is_snake_body(food_xy[0], food_xy[1]):
-                break
         self.food = Food(food_xy)
 
 
