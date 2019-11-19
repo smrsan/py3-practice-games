@@ -1,6 +1,5 @@
 from time import sleep
 from random import uniform
-import math
 
 # Installed dependencies
 from pynput.keyboard import Listener, Key
@@ -18,7 +17,6 @@ class Game:
         self.board_height = 25
         self.frame_delay = .25
         self.should_exit = False
-        self.should_grow = False
         self.key_listener = None
         self.snake = Snake(
             board_width=self.board_width,
@@ -41,23 +39,19 @@ class Game:
         self.key_listener.stop()
 
     def run(self):
-        if self.should_exit:
-            self.deinit()
-            self.should_exit = False
-            return
-        self.render_board()
-        sleep(self.frame_delay)
-        self.move_snake()
-        self.run()
+        while not self.should_exit:
+            self.render_board()
+            sleep(self.frame_delay)
+            self.move_snake()
+        self.should_exit = False
+        self.deinit()
 
     def render_board(self):
         clear_term()
         for y in range(self.board_height):
             for x in range(self.board_width):
-                # Is Board Wall?
                 if self.is_wall(x, y):
                     print('#', end='')
-                # Is Snake Head?
                 elif self.is_snake_head(x, y):
                     print(self.snake.color + self.snake.head_char,
                           end=colorama.Style.RESET_ALL)
@@ -71,18 +65,30 @@ class Game:
                     print(' ', end='')
                 print(' ', end='')
             print()
-        print(f"<Snake Len: {len(self.snake.body_xy) + 1}> - ", end='')
+        print(f"🃟 <Snake Len: {len(self.snake.body_xy) + 1}> - ", end='')
         print(
             f"<Head XY: {{{self.snake.head_xy[0]}, {self.snake.head_xy[1]}}}> - ",
             end=''
         )
-        print(f"<Food XY: {{{self.food.xy[0]}, {self.food.xy[1]}}}>")
+        print(f"<Food XY: {{{self.food.xy[0]}, {self.food.xy[1]}}}> 🃟")
+
+    def is_top_wall(self, y):
+        return not y
+
+    def is_left_wall(self, x):
+        return not x
+
+    def is_bottom_wall(self, y):
+        return y == self.board_height - 1
+
+    def is_right_wall(self, x):
+        return x == self.board_width - 1
 
     def is_wall(self, x, y):
-        return not x or \
-            not y or \
-            x == self.board_width - 1 or \
-            y == self.board_height - 1
+        return self.is_top_wall(y) or \
+            self.is_left_wall(x) or \
+            self.is_bottom_wall(y) or \
+            self.is_right_wall(x)
 
     def is_snake_head(self, x, y):
         return x == self.snake.head_xy[0] and \
@@ -110,27 +116,28 @@ class Game:
         elif self.snake.move_dir == 'right':
             self.snake.head_xy[0] += 1
 
-        for part in self.snake.body_xy:
-            temp = part[:]
-            part[0] = last_part_xy[0]
-            part[1] = last_part_xy[1]
-            last_part_xy = temp
+        if self.is_top_wall(self.snake.head_xy[1]):
+            self.snake.head_xy[1] = self.board_height - 2
+        elif self.is_left_wall(self.snake.head_xy[0]):
+            self.snake.head_xy[0] = self.board_width - 2
+        elif self.is_bottom_wall(self.snake.head_xy[1]):
+            self.snake.head_xy[1] = 1
+        elif self.is_right_wall(self.snake.head_xy[0]):
+            self.snake.head_xy[0] = 1
 
-        if self.should_grow:
-            self.should_grow = False
-            self.snake.body_xy.append(
-                last_part_xy[:]
-            )
-            self.drop_food()
+        self.snake.body_xy.append(last_part_xy)
+        last_part_xy = self.snake.body_xy[0]
 
         if self.is_food(self.snake.head_xy[0], self.snake.head_xy[1]):
-            self.should_grow = True
+            self.drop_food()
+        else:
+            self.snake.body_xy.remove(last_part_xy)
 
     def drop_food(self):
         food_xy = [None, None]
         while True:
-            food_xy[0] = math.floor(uniform(1, self.board_width - 2))
-            food_xy[1] = math.floor(uniform(1, self.board_height - 2))
+            food_xy[0] = int(uniform(1, self.board_width - 2))
+            food_xy[1] = int(uniform(1, self.board_height - 2))
             if not self.is_snake_head(food_xy[0], food_xy[1]) and \
                     not self.is_snake_body(food_xy[0], food_xy[1]):
                 break
