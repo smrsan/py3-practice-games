@@ -8,15 +8,20 @@ import colorama
 # Misc
 from snake.Snake import Snake
 from snake.Food import Food
-from utils import clear_term
+from utils import clear_term, flush_input
+
+
+NORMAL_FRAME_DELAY = .25
+SPEED_FRAME_DELAY = .05
 
 
 class Game:
     def __init__(self):
         self.board_width = 35
         self.board_height = 25
-        self.frame_delay = .25
+        self.frame_delay = NORMAL_FRAME_DELAY
         self.should_exit = False
+        self.is_lost = False
         self.key_listener = None
         self.snake = Snake(
             board_width=self.board_width,
@@ -38,13 +43,16 @@ class Game:
 
     def dettach_keyboard_events(self):
         self.key_listener.stop()
+        flush_input()
 
     def run(self):
         while not self.should_exit:
             self.render_board()
-            sleep(self.frame_delay)
-            self.move_snake()
-        self.should_exit = False
+            if self.is_snake_body(self.snake.head_xy[0], self.snake.head_xy[1]):
+                self.should_exit = self.is_lost = True
+            else:
+                sleep(self.frame_delay)
+                self.move_snake()
         self.deinit()
 
     def render_board(self):
@@ -158,34 +166,48 @@ class Game:
             food_xy[1] = int(uniform(1, self.board_height - 2))
         self.food = Food(food_xy)
 
+    def speed_up(self):
+        self.frame_delay = SPEED_FRAME_DELAY
+
+    def slow_down(self):
+        self.frame_delay = NORMAL_FRAME_DELAY
+
 
 def on_press(game):
     def fn(key):
+        current_dir = game.snake.move_dir
+        new_dir = None
         try:
             key_char = key.char.lower()
-            if key_char == 'w':
-                game.snake.move_dir = 'up'
-            elif key_char == 's':
-                game.snake.move_dir = 'down'
-            elif key_char == 'a':
-                game.snake.move_dir = 'left'
-            elif key_char == 'd':
-                game.snake.move_dir = 'right'
+            if key_char == 'w' and current_dir != 'down':
+                new_dir = 'up'
+            elif key_char == 's' and current_dir != 'up':
+                new_dir = 'down'
+            elif key_char == 'a' and current_dir != 'right':
+                new_dir = 'left'
+            elif key_char == 'd' and current_dir != 'left':
+                new_dir = 'right'
         except AttributeError:
-            if key == Key.up:
-                game.snake.move_dir = 'up'
-            elif key == Key.down:
-                game.snake.move_dir = 'down'
-            elif key == Key.left:
-                game.snake.move_dir = 'left'
-            elif key == Key.right:
-                game.snake.move_dir = 'right'
+            if key == Key.up and current_dir != 'down':
+                new_dir = 'up'
+            elif key == Key.down and current_dir != 'up':
+                new_dir = 'down'
+            elif key == Key.left and current_dir != 'right':
+                new_dir = 'left'
+            elif key == Key.right and current_dir != 'left':
+                new_dir = 'right'
             elif key == Key.esc:
                 game.should_exit = True
+
+        if current_dir == new_dir:
+            game.speed_up()
+        elif new_dir != None:
+            game.snake.move_dir = new_dir
+
     return fn
 
 
 def on_release(game):
     def fn(key):
-        pass
+        game.slow_down()
     return fn
