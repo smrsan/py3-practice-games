@@ -24,6 +24,8 @@ COMING_DOWN_SPEED_FRAME_DELAY = .05
 
 RESOLVING_FRAME_DELAY = .05
 
+GRAVITY_FRAME_DELAY = .1
+
 
 class Game:
     def __init__(self):
@@ -40,6 +42,9 @@ class Game:
         self.resolvable_rows = []
         self.resolving_frame_delay = RESOLVING_FRAME_DELAY
         self.resolving_frame_counter = 1
+        self.has_empty_rows = False
+        self.gravity_frame_delay = GRAVITY_FRAME_DELAY
+        self.gravity_frame_counter = 1
         self.get_new_hand_shape()
         self.attach_keyboard_events()
 
@@ -71,12 +76,18 @@ class Game:
     def run(self):
         while not self.should_exit:
             self.render_board()
-            if self.should_animate_resolving():
-                self.animate_resolving()
+
             if self.should_animate_coming_down():
                 if not self.hand_shape:
                     self.get_new_hand_shape()
                 self.animate_coming_down()
+
+            if self.should_animate_resolving():
+                self.animate_resolving()
+
+            if self.should_animate_gravity():
+                self.animate_gravity()
+
             sleep(self.frame_delay)
         self.deinit()
 
@@ -104,7 +115,7 @@ class Game:
             print()
 
     def should_animate_coming_down(self):
-        if self.resolvable_rows:
+        if self.resolvable_rows or self.has_empty_rows:
             return False
         if self.coming_down_frame_counter * self.frame_delay >= self.coming_down_frame_delay:
             self.coming_down_frame_counter = 1
@@ -145,6 +156,7 @@ class Game:
         if not self.has_board_row(min_y):
             self.resolvable_rows.clear()
             self.resolving_frame_counter = 1
+            self.check_middle_empty_rows()
             return
         min_x = min(self.board_blocks[min_y].keys())
         for y in self.resolvable_rows:
@@ -156,6 +168,45 @@ class Game:
             if len(self.board_blocks[y]) == self.board_width - 2:
                 resolvable_rows.append(y)
         self.resolvable_rows = resolvable_rows
+
+    def check_middle_empty_rows(self):
+        prev_y = None
+        latest_y = None
+
+        for y in self.board_blocks.keys():
+            latest_y = y
+            if prev_y == None:
+                prev_y = y
+                continue
+            if y - prev_y > 1:
+                self.has_empty_rows = True
+                return
+
+        if latest_y != None and not self.is_bottom_wall(latest_y + 1):
+            self.has_empty_rows = True
+            return
+
+        self.has_empty_rows = False
+
+    def should_animate_gravity(self):
+        if not self.has_empty_rows:
+            return False
+        if self.gravity_frame_counter * self.frame_delay >= self.gravity_frame_delay:
+            self.gravity_frame_counter = 1
+            return True
+        self.gravity_frame_counter += 1
+        return False
+
+    def animate_gravity(self):
+        animated_rows_count = 0
+        for y in reversed(sorted(self.board_blocks.keys())):
+            next_row_y = y + 1
+            if not self.is_bottom_wall(next_row_y) and not self.has_board_row(next_row_y):
+                self.board_blocks[next_row_y] = self.board_blocks[y].copy()
+                del self.board_blocks[y]
+                animated_rows_count += 1
+        if not animated_rows_count:
+            self.has_empty_rows = False
 
     def is_empty_board_block(self, x, y):
         return self.get_board_block(x, y) == None
