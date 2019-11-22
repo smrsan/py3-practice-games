@@ -371,7 +371,7 @@ def on_press(game):
     def fn(key):
         try:
             key_char = key.char.lower()
-            if key_char in ['wad']:
+            if key_char in 'wad':
                 if key_char == 'w' and game.can_rotate_right():
                     game.hand_shape.rotate_right()
                 elif key_char == 'a' and game.can_go_left():
