@@ -40,6 +40,7 @@ class Game:
         self.coming_down_frame_delay = COMING_DOWN_NORMAL_FRAME_DELAY
         self.coming_down_frame_counter = 1
         self.resolvable_rows = []
+        self.resolved_rows = 0
         self.resolving_frame_delay = RESOLVING_FRAME_DELAY
         self.resolving_frame_counter = 1
         self.has_empty_rows = False
@@ -123,6 +124,7 @@ class Game:
             print()
 
         status = f'\nElapsed Time: {self.get_formated_time()}'
+        status += f'\nResolved Rows: {self.resolved_rows}'
         print(status)
         self.should_rerender = False
 
@@ -179,6 +181,7 @@ class Game:
         if not self.has_board_row(min_y):
             self.resolvable_rows.clear()
             self.resolving_frame_counter = 1
+            self.resolved_rows += 1
             self.check_middle_empty_rows()
             return
         min_x = min(self.board_blocks[min_y].keys())
