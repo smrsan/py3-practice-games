@@ -46,6 +46,7 @@ class Game:
         self.gravity_frame_delay = GRAVITY_FRAME_DELAY
         self.gravity_frame_counter = 1
         self.should_rerender = True
+        self.time = 0
         self.get_new_hand_shape(True)
         self.attach_keyboard_events()
 
@@ -90,6 +91,10 @@ class Game:
                 self.animate_gravity()
 
             sleep(self.frame_delay)
+
+            self.time += self.frame_delay
+            if not self.time % 1:
+                self.should_rerender = True
         self.deinit()
 
     def render_board(self):
@@ -116,7 +121,19 @@ class Game:
                 else:
                     print('  ', end='')
             print()
+
+        status = f'\nElapsed Time: {self.get_formated_time()}'
+        print(status)
         self.should_rerender = False
+
+    def get_formated_time(self):
+        mins = int(self.time // 60)
+        secs = int(self.time % 60)
+
+        mins = f'0{mins}' if mins < 10 else mins
+        secs = f'0{secs}' if secs < 10 else secs
+
+        return f'{mins}:{secs}'
 
     def should_animate_coming_down(self):
         if self.resolvable_rows or self.has_empty_rows:
