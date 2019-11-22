@@ -1,9 +1,9 @@
 from time import sleep
 from random import random
-import colorama
 
 # Installed dependencies
 from pynput.keyboard import Listener, Key
+import colorama
 
 # Misc
 from utils import flush_input, clear_term
