@@ -46,7 +46,7 @@ class Game:
         self.gravity_frame_delay = GRAVITY_FRAME_DELAY
         self.gravity_frame_counter = 1
         self.should_rerender = True
-        self.get_new_hand_shape()
+        self.get_new_hand_shape(True)
         self.attach_keyboard_events()
 
     def deinit(self):
@@ -57,11 +57,11 @@ class Game:
     def frame_delay(self):
         return self.__frame_delay
 
-    def get_new_hand_shape(self):
+    def get_new_hand_shape(self, init=False):
         random_shape_index = int(random() * len(SHAPE_LIST))
         new_shape = SHAPE_LIST[random_shape_index]()
         new_shape.xy[0] = int(self.board_width / 2 - new_shape.width / 2)
-        new_shape.xy[1] = 1
+        new_shape.xy[1] = 1 if init else 0
         self.hand_shape = new_shape
 
     def attach_keyboard_events(self):
@@ -83,10 +83,10 @@ class Game:
                     self.get_new_hand_shape()
                 self.animate_coming_down()
 
-            if self.should_animate_resolving():
+            elif self.should_animate_resolving():
                 self.animate_resolving()
 
-            if self.should_animate_gravity():
+            elif self.should_animate_gravity():
                 self.animate_gravity()
 
             sleep(self.frame_delay)
