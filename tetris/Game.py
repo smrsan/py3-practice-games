@@ -48,6 +48,7 @@ class Game:
         self.gravity_frame_counter = 1
         self.should_rerender = True
         self.time = 0
+        self.is_lost = False
         self.get_new_hand_shape(True)
         self.attach_keyboard_events()
 
@@ -83,7 +84,11 @@ class Game:
             if self.should_animate_coming_down():
                 if not self.hand_shape:
                     self.get_new_hand_shape()
-                self.animate_coming_down()
+                    if self.has_overlapped_blocks(self.hand_shape):
+                        self.is_lost = True
+                        self.should_exit = True
+                if not self.is_lost:
+                    self.animate_coming_down()
 
             elif self.should_animate_resolving():
                 self.animate_resolving()
