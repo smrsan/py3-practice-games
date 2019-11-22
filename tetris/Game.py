@@ -184,9 +184,9 @@ class Game:
         self.should_rerender = True
         min_y = self.resolvable_rows[0]
         if not self.has_board_row(min_y):
+            self.resolved_rows += len(self.resolvable_rows)
             self.resolvable_rows.clear()
             self.resolving_frame_counter = 1
-            self.resolved_rows += 1
             self.check_middle_empty_rows()
             return
         min_x = min(self.board_blocks[min_y].keys())
