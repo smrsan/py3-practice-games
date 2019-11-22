@@ -45,6 +45,7 @@ class Game:
         self.has_empty_rows = False
         self.gravity_frame_delay = GRAVITY_FRAME_DELAY
         self.gravity_frame_counter = 1
+        self.should_rerender = True
         self.get_new_hand_shape()
         self.attach_keyboard_events()
 
@@ -92,6 +93,8 @@ class Game:
         self.deinit()
 
     def render_board(self):
+        if not self.should_rerender:
+            return
         clear_term()
         for y in range(self.board_height):
             for x in range(self.board_width):
@@ -113,6 +116,7 @@ class Game:
                 else:
                     print('  ', end='')
             print()
+        self.should_rerender = False
 
     def should_animate_coming_down(self):
         if self.resolvable_rows or self.has_empty_rows:
@@ -124,6 +128,7 @@ class Game:
         return False
 
     def animate_coming_down(self):
+        self.should_rerender = True
         if self.can_go_down():
             self.hand_shape.go_down()
         else:
@@ -152,6 +157,7 @@ class Game:
         return False
 
     def animate_resolving(self):
+        self.should_rerender = True
         min_y = self.resolvable_rows[0]
         if not self.has_board_row(min_y):
             self.resolvable_rows.clear()
@@ -198,6 +204,7 @@ class Game:
         return False
 
     def animate_gravity(self):
+        self.should_rerender = True
         animated_rows_count = 0
         for y in reversed(sorted(self.board_blocks.keys())):
             next_row_y = y + 1
@@ -364,21 +371,25 @@ def on_press(game):
     def fn(key):
         try:
             key_char = key.char.lower()
-            if key_char == 'w' and game.can_rotate_right():
-                game.hand_shape.rotate_right()
-            elif key_char == 'a' and game.can_go_left():
-                game.hand_shape.go_left()
-            elif key_char == 'd' and game.can_go_right():
-                game.hand_shape.go_right()
+            if key_char in ['wad']:
+                if key_char == 'w' and game.can_rotate_right():
+                    game.hand_shape.rotate_right()
+                elif key_char == 'a' and game.can_go_left():
+                    game.hand_shape.go_left()
+                elif key_char == 'd' and game.can_go_right():
+                    game.hand_shape.go_right()
+                game.should_rerender = True
             elif key_char == 's':
                 game.speed_up()
         except AttributeError:
-            if key == Key.up and game.can_rotate_right():
-                game.hand_shape.rotate_right()
-            elif key == Key.left and game.can_go_left():
-                game.hand_shape.go_left()
-            elif key == Key.right and game.can_go_right():
-                game.hand_shape.go_right()
+            if key in [Key.up, Key.left, Key.right]:
+                if key == Key.up and game.can_rotate_right():
+                    game.hand_shape.rotate_right()
+                elif key == Key.left and game.can_go_left():
+                    game.hand_shape.go_left()
+                elif key == Key.right and game.can_go_right():
+                    game.hand_shape.go_right()
+                game.should_rerender = True
             elif key == Key.down:
                 game.speed_up()
             elif key == Key.esc:
