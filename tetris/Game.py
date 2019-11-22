@@ -338,7 +338,8 @@ class Game:
         shape_width = self.hand_shape.width
         shape_height = self.hand_shape.height
         if self.has_overlapped_blocks(self.hand_shape) or \
-                self.is_wall(shape_x + shape_width - 1, shape_y + shape_height - 1):
+                shape_x + shape_width >= self.board_width or \
+                shape_y + shape_height >= self.board_height:
             result = False
         self.hand_shape.rotate_right()
         return result
@@ -352,7 +353,8 @@ class Game:
         shape_width = self.hand_shape.width
         shape_height = self.hand_shape.height
         if self.has_overlapped_blocks(self.hand_shape) or \
-                self.is_wall(shape_x + shape_width - 1, shape_y + shape_height - 1):
+                shape_x + shape_width >= self.board_width or \
+                shape_y + shape_height >= self.board_height:
             result = False
         self.hand_shape.rotate_left()
         return result
