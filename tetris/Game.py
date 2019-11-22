@@ -19,8 +19,10 @@ SHAPE_LIST = (
     shapes.ZShape
 )
 
-GRAVITY_NORMAL_FRAME_DELAY = .75
-GRAVITY_SPEED_FRAME_DELAY = .05
+COMING_DOWN_NORMAL_FRAME_DELAY = .75
+COMING_DOWN_SPEED_FRAME_DELAY = .05
+
+RESOLVING_FRAME_DELAY = .05
 
 
 class Game:
@@ -33,8 +35,11 @@ class Game:
         self.is_lost = False
         self.key_listener = None
         self.hand_shape = None
-        self.gravity_frame_delay = GRAVITY_NORMAL_FRAME_DELAY
-        self.gravity_frame_counter = 1
+        self.coming_down_frame_delay = COMING_DOWN_NORMAL_FRAME_DELAY
+        self.coming_down_frame_counter = 1
+        self.resolvable_rows = []
+        self.resolving_frame_delay = RESOLVING_FRAME_DELAY
+        self.resolving_frame_counter = 1
         self.get_new_hand_shape()
         self.attach_keyboard_events()
 
@@ -66,11 +71,12 @@ class Game:
     def run(self):
         while not self.should_exit:
             self.render_board()
-            if self.should_animate_gravity():
-                if not self.can_go_down():
-                    self.put_shape()
-                else:
-                    self.hand_shape.go_down()
+            if self.should_animate_resolving():
+                self.animate_resolving()
+            if self.should_animate_coming_down():
+                if not self.hand_shape:
+                    self.get_new_hand_shape()
+                self.animate_coming_down()
             sleep(self.frame_delay)
         self.deinit()
 
@@ -81,7 +87,7 @@ class Game:
                 if self.is_wall(x, y):
                     self.draw_wall(x, y)
 
-                elif self.hand_shape.is_shape(x, y):
+                elif self.hand_shape and self.hand_shape.is_shape(x, y):
                     print(
                         self.hand_shape.color + '▓▓',
                         end=colorama.Style.RESET_ALL
@@ -97,9 +103,24 @@ class Game:
                     print('  ', end='')
             print()
 
+    def should_animate_coming_down(self):
+        if self.resolvable_rows:
+            return False
+        if self.coming_down_frame_counter * self.frame_delay >= self.coming_down_frame_delay:
+            self.coming_down_frame_counter = 1
+            return True
+        self.coming_down_frame_counter += 1
+        return False
+
+    def animate_coming_down(self):
+        if self.can_go_down():
+            self.hand_shape.go_down()
+        else:
+            self.put_shape()
+            self.get_resolvable_rows()
+
     def put_shape(self):
         (shape_x, shape_y) = self.hand_shape.xy
-
         for y in range(self.hand_shape.height):
             for x in range(self.hand_shape.width):
                 if self.hand_shape.is_colored_block(x, y):
@@ -108,7 +129,33 @@ class Game:
                         y + shape_y,
                         self.hand_shape.color
                     )
-        self.get_new_hand_shape()
+        self.hand_shape = None
+
+    def should_animate_resolving(self):
+        if not self.resolvable_rows:
+            return False
+        if self.resolving_frame_counter * self.frame_delay >= self.resolving_frame_delay:
+            self.resolving_frame_counter = 1
+            return True
+        self.resolving_frame_counter += 1
+        return False
+
+    def animate_resolving(self):
+        min_y = self.resolvable_rows[0]
+        if not self.has_board_row(min_y):
+            self.resolvable_rows.clear()
+            self.resolving_frame_counter = 1
+            return
+        min_x = min(self.board_blocks[min_y].keys())
+        for y in self.resolvable_rows:
+            self.del_board_block(min_x, y)
+
+    def get_resolvable_rows(self):
+        resolvable_rows = []
+        for y in self.board_blocks.keys():
+            if len(self.board_blocks[y]) == self.board_width - 2:
+                resolvable_rows.append(y)
+        self.resolvable_rows = resolvable_rows
 
     def is_empty_board_block(self, x, y):
         return self.get_board_block(x, y) == None
@@ -125,10 +172,32 @@ class Game:
         return False
 
     def get_board_block(self, x, y):
-        return self.board_blocks.get(f'{x}:{y}', None)
+        if not self.has_board_row(y):
+            return None
+        return self.board_blocks[y].get(x, None)
 
     def set_board_block(self, x, y, color):
-        self.board_blocks[f'{x}:{y}'] = color
+        if not self.has_board_row(y):
+            self.board_blocks[y] = dict()
+        self.board_blocks[y][x] = color
+
+    def del_board_block(self, x, y):
+        if not self.has_board_row(y):
+            return
+        if not self.has_board_block(x, y):
+            return
+        del self.board_blocks[y][x]
+
+        if not len(self.board_blocks[y]):
+            del self.board_blocks[y]
+
+    def has_board_row(self, y):
+        return self.board_blocks.get(y, None) != None
+
+    def has_board_block(self, x, y):
+        if not self.has_board_row(y):
+            return False
+        return self.board_blocks[y].get(x, None) != None
 
     def draw_wall(self, x, y):
         if self.is_top_wall(y):
@@ -167,6 +236,8 @@ class Game:
             self.is_right_wall(x)
 
     def can_go_left(self):
+        if not self.hand_shape:
+            return False
         result = True
         self.hand_shape.go_left()
         (shape_x, shape_y) = self.hand_shape.xy
@@ -177,6 +248,8 @@ class Game:
         return result
 
     def can_go_right(self):
+        if not self.hand_shape:
+            return False
         result = True
         self.hand_shape.go_right()
         (shape_x, shape_y) = self.hand_shape.xy
@@ -187,6 +260,8 @@ class Game:
         return result
 
     def can_go_down(self):
+        if not self.hand_shape:
+            return False
         result = True
         self.hand_shape.go_down()
         (shape_x, shape_y) = self.hand_shape.xy
@@ -196,14 +271,9 @@ class Game:
         self.hand_shape.go_up()
         return result
 
-    def should_animate_gravity(self):
-        if self.gravity_frame_counter * self.frame_delay >= self.gravity_frame_delay:
-            self.gravity_frame_counter = 1
-            return True
-        self.gravity_frame_counter += 1
-        return False
-
     def can_rotate_left(self):
+        if not self.hand_shape:
+            return False
         result = True
         self.hand_shape.rotate_left()
         (shape_x, shape_y) = self.hand_shape.xy
@@ -216,6 +286,8 @@ class Game:
         return result
 
     def can_rotate_right(self):
+        if not self.hand_shape:
+            return False
         result = True
         self.hand_shape.rotate_right()
         (shape_x, shape_y) = self.hand_shape.xy
@@ -228,10 +300,10 @@ class Game:
         return result
 
     def speed_up(self):
-        self.gravity_frame_delay = GRAVITY_SPEED_FRAME_DELAY
+        self.coming_down_frame_delay = COMING_DOWN_SPEED_FRAME_DELAY
 
     def slow_down(self):
-        self.gravity_frame_delay = GRAVITY_NORMAL_FRAME_DELAY
+        self.coming_down_frame_delay = COMING_DOWN_NORMAL_FRAME_DELAY
 
     def end(self):
         self.should_exit = True
