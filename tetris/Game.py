@@ -99,7 +99,7 @@ class Game:
             sleep(self.frame_delay)
 
             self.time += self.frame_delay
-            if not self.time % 1:
+            if not self.time % 1 and not (self.resolvable_rows or self.has_empty_rows):
                 self.should_rerender = True
         self.deinit()
 
