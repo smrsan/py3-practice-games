@@ -7,6 +7,7 @@ def mastermind_game():
         play_again = True
         first_user_input = input('Enter numbers (separated by space): ')
         first_user_input = first_user_input.split(' ')
+        clear_term()
         while True:
             guess_input = input("Guess numbers: ")
             guess_input = guess_input.split(" ")
