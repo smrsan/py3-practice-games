@@ -42,4 +42,12 @@ class Board:
         return self.coin_types[self.matrix[x][y]]
 
     def is_col_full(self, x):
+        if x < 0 or x > len(self.matrix) - 1:
+            return True
         return len(self.matrix[x]) == 6
+
+    def is_full(self):
+        for col in self.matrix:
+            if len(col) < 6:
+                return False
+        return True
