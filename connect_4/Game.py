@@ -15,6 +15,10 @@ class Game:
             clear_term()
 
             self.board.render()
+            if self.board.is_full():
+                print("It's a Tie!")
+                return
+
             user_n = self.turn + 1
             coin_x = input(f'[User{user_n}] Enter col num or ("q" to exit): ')
             coin_x = coin_x.strip()
