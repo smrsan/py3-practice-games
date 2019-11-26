@@ -18,11 +18,14 @@ class Game:
                 return
 
             user_n = self.turn + 1
-            coin_x = input(f'[User{user_n}] Enter col num or ("q" to exit): ')
+            coin_x = input(f'[User{user_n}] Enter col num ("q" to exit): ')
             coin_x = coin_x.strip()
 
-            if coin_x == 'q':
-                return
+            if not coin_x.isnumeric():
+                if coin_x.lower() == 'q':
+                    return
+                else:
+                    continue
 
             coin_x = int(coin_x) - 1
             if not self.board.is_col_full(coin_x):
