@@ -5,8 +5,6 @@ from utils import clear_term
 
 class Game:
     def __init__(self):
-        self.__frame_delay = .05
-        self.is_lost = False
         self.board = Board()
         self.turn = 0
 
