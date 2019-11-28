@@ -8,7 +8,7 @@ def guess_game():
     resume = True
     while resume:
         clear_term()
-        hidden_num = int(random() * 100) - 1
+        hidden_num = int(random() * 100)
         while True:
             guess_num = input('Guess the hidden num [0-99]: ').strip()
             if not guess_num.isnumeric():
