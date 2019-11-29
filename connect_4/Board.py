@@ -70,6 +70,9 @@ class Board:
                     if o_counter == 4:
                         return 1
 
+        x_counter = 0
+        o_counter = 0
+
         # Check Horizontal Winners
         for y in range(6):
             for x in range(7):
