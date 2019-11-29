@@ -30,6 +30,10 @@ class Game:
             coin_x = int(coin_x) - 1
             if not self.board.is_col_full(coin_x):
                 self.board.put_coin(coin_x, self.turn)
+                winner = self.board.get_winner()
+                if winner != -1:
+                    print(f'User{winner + 1} has WON the Game!!!')
+                    return
                 self.next_turn()
 
     def next_turn(self):

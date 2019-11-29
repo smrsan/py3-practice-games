@@ -51,3 +51,41 @@ class Board:
             if len(col) < 6:
                 return False
         return True
+
+    def get_winner(self):
+        x_counter = 0
+        o_counter = 0
+
+        # Check Vertical Winners
+        for col in self.matrix:
+            for cell in col:
+                if cell == 0:
+                    x_counter += 1
+                    o_counter = 0
+                    if x_counter == 4:
+                        return 0
+                else:
+                    x_counter = 0
+                    o_counter += 1
+                    if o_counter == 4:
+                        return 1
+
+        # Check Horizontal Winners
+        for y in range(6):
+            for x in range(7):
+                cell = self.matrix[x][y] if y < len(self.matrix[x]) else None
+                if cell == 0:
+                    x_counter += 1
+                    o_counter = 0
+                    if x_counter == 4:
+                        return 0
+                elif cell == 1:
+                    x_counter = 0
+                    o_counter += 1
+                    if o_counter == 4:
+                        return 1
+                else:
+                    x_counter = o_counter = 0
+
+        # No one has won the game...
+        return -1
