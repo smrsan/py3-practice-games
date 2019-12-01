@@ -93,7 +93,7 @@ class Board:
                     x_counter = o_counter = 0
 
         # Check Diagonal Winners
-        for z in range(self.height // 2):
+        for z in range(3):
             # because of 4 diagonal directions
             x_counter = [0 for i in range(4)]
             o_counter = [0 for i in range(4)]
