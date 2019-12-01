@@ -114,7 +114,7 @@ class Board:
             y.append(y[1])
 
             for i in range(self.height - z):  # for each calculated x,y
-                for j in range(len(x)):  # for each diagonal direction
+                for j in range(4):  # for each diagonal direction
                     # d = diagonal
                     dx, dy = x[j][i], y[j][i]
                     cell = None
