@@ -1,8 +1,8 @@
 class Board:
-    def __init__(self, width=7, height=6):
+    def __init__(self):
         self.coin_types = ['X', 'O']
-        self.width = width
-        self.height = height
+        self.width = 7
+        self.height = 6
         self.matrix = [
             [] for i in range(self.width)
         ]
