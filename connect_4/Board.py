@@ -1,12 +1,28 @@
 class Board:
-    def __init__(self, width=7, height=6, win_condition_num=4):
-        self.coin_types = ['X', 'O']
-        self.width = width
-        self.height = height
-        self.win_condition_num = win_condition_num
+    def __init__(self, game, width=7, height=6, win_condition_num=4):
+        self.__game = game
+        self.__width = width
+        self.__height = height
+        self.__win_condition_num = win_condition_num
         self.matrix = [
             [] for i in range(self.width)
         ]
+
+    @property
+    def game(self):
+        return self.__game
+
+    @property
+    def width(self):
+        return self.__width
+
+    @property
+    def height(self):
+        return self.__height
+
+    @property
+    def win_condition_num(self):
+        return self.__win_condition_num
 
     def render(self):
         for i in range(0, self.width):
@@ -38,11 +54,14 @@ class Board:
     def put_coin(self, x, player_num):
         self.matrix[x].append(player_num)
 
+    def rm_coin(self, x):
+        return self.matrix[x].pop()
+
     def has_coin(self, x, y):
         return y < len(self.matrix[x])
 
     def get_coin(self, x, y):
-        return self.coin_types[self.matrix[x][y]]
+        return self.game.players[self.matrix[x][y]].coin_char
 
     def is_col_full(self, x):
         if x < 0 or x >= self.width:
