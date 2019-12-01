@@ -1,8 +1,9 @@
 class Board:
-    def __init__(self):
+    def __init__(self, width=7, height=6, win_condition_num=4):
         self.coin_types = ['X', 'O']
-        self.width = 7
-        self.height = 6
+        self.width = width
+        self.height = height
+        self.win_condition_num = win_condition_num
         self.matrix = [
             [] for i in range(self.width)
         ]
@@ -55,45 +56,50 @@ class Board:
         return True
 
     def get_winner(self):
-        x_counter = 0
-        o_counter = 0
-
         # Check Vertical Winners
         for col in self.matrix:
+            x_counter = 0
+            o_counter = 0
             for cell in col:
                 if cell == 0:
                     x_counter += 1
                     o_counter = 0
-                    if x_counter == 4:
+                    if x_counter == self.win_condition_num:
                         return 0
                 else:
                     x_counter = 0
                     o_counter += 1
-                    if o_counter == 4:
+                    if o_counter == self.win_condition_num:
                         return 1
-
-        x_counter = 0
-        o_counter = 0
 
         # Check Horizontal Winners
         for y in range(self.height):
+            x_counter = 0
+            o_counter = 0
             for x in range(self.width):
                 cell = self.matrix[x][y] if self.has_coin(x, y) else None
                 if cell == 0:
                     x_counter += 1
                     o_counter = 0
-                    if x_counter == 4:
+                    if x_counter == self.win_condition_num:
                         return 0
                 elif cell == 1:
                     x_counter = 0
                     o_counter += 1
-                    if o_counter == 4:
+                    if o_counter == self.win_condition_num:
                         return 1
                 else:
                     x_counter = o_counter = 0
 
         # Check Diagonal Winners
-        for z in range(3):
+        for z in range(
+            max(
+                [
+                    self.width - self.win_condition_num,
+                    self.height - self.win_condition_num
+                ]
+            )
+        ):
             # because of 4 diagonal directions
             x_counter = [0 for i in range(4)]
             o_counter = [0 for i in range(4)]
@@ -101,13 +107,13 @@ class Board:
             x = []
             y = []
 
-            x.append([i for i in range(6-z)])
-            y.append([i for i in reversed(range(6-z))])
+            x.append([i for i in range((self.width-1)-z)])
+            y.append([i for i in reversed(range(self.height-z))])
 
-            x.append([i for i in range(z+1, 6+1)])
-            y.append([i for i in range(5, z-1, -1)])
+            x.append([i for i in range(z+1, self.width)])
+            y.append([i for i in range(self.height-1, z-1, -1)])
 
-            x.append([i for i in range(6, z, -1)])
+            x.append([i for i in range(self.width-1, z, -1)])
             y.append(y[0])
 
             x.append(y[0])
@@ -125,12 +131,12 @@ class Board:
                     if cell == 0:
                         x_counter[j] += 1
                         o_counter[j] = 0
-                        if x_counter[j] == 4:
+                        if x_counter[j] == self.win_condition_num:
                             return 0
                     elif cell == 1:
                         x_counter[j] = 0
                         o_counter[j] += 1
-                        if o_counter[j] == 4:
+                        if o_counter[j] == self.win_condition_num:
                             return 1
                     else:
                         x_counter[j] = o_counter[j] = 0
